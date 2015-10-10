@@ -16,7 +16,7 @@ namespace Plugin\ShipNumber;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Eccube\Entity\MailHistory;
-
+use Doctrine\Common\Collections\ArrayCollection;
 
 class ShipNumberEvent
 {
@@ -178,11 +178,36 @@ class ShipNumberEvent
 
       if ('POST' === $app['request']->getMethod()) {
 
-          $form = $app['form.factory']
-              ->createBuilder('order')
-              ->getForm();
+        $id = $app['request']->attributes->get('id');
 
-          $form->handleRequest($app['request']);
+        $TargetOrder = null;
+        $OriginOrder = null;
+
+        if (is_null($id)) {
+            // 空のエンティティを作成.
+            $TargetOrder = $this->newOrder();
+        } else {
+            $TargetOrder = $app['eccube.repository.order']->find($id);
+            if (is_null($TargetOrder)) {
+                throw new NotFoundHttpException();
+            }
+        }
+
+        // 編集前の受注情報を保持
+        $OriginOrder = clone $TargetOrder;
+        $OriginalOrderDetails = new ArrayCollection();
+
+        foreach ($TargetOrder->getOrderDetails() as $OrderDetail) {
+            $OriginalOrderDetails->add($OrderDetail);
+        }
+
+        $form = $app['form.factory']
+            ->createBuilder('order', $TargetOrder)
+            ->getForm();
+
+        $form->handleRequest($app['request']);
+
+        if ($form->isValid()) {
 
           $ship_number = $form->get('content')->getData();
 
@@ -203,7 +228,7 @@ class ShipNumberEvent
 
           $app['orm.em']->persist($OrderContent);
           $app['orm.em']->flush();
-
+        }
       }
     }
 
