@@ -25,6 +25,7 @@ class Version20150829190000 extends AbstractMigration
     public function down(Schema $schema)
     {
         $schema->dropTable('plg_ship_number');
+        $this->addSql('DELETE FROM dtb_mail_template WHERE name = "発送メール" ');
     }
 
     public function postUp(Schema $schema)
