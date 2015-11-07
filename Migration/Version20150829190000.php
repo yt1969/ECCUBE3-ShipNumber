@@ -26,8 +26,8 @@ class Version20150829190000 extends AbstractMigration
     {
         $schema->dropTable('plg_ship_number');
 
-// 送信履歴で使用するため、削除できない        
-//        $this->addSql('DELETE FROM dtb_mail_template WHERE name = "発送メール" ');
+        // 送信履歴で使用するため、削除できない
+        //$this->connection->delete('dtb_mail_template', array('name' => '発送メール'));
     }
 
     public function postUp(Schema $schema)
@@ -35,6 +35,13 @@ class Version20150829190000 extends AbstractMigration
 
         $app = new \Eccube\Application();
         $app->boot();
+
+        $statement = $this->connection->prepare('SELECT template_id FROM dtb_mail_template');
+        $statement->execute();
+        $templateId = $statement->fetchAll();
+
+        $templateIdNumber = count($templateId) + 1;
+
         $creatorId = '1';
         $name = '発送メール';
         $fileName = 'Mail/order.twig';
@@ -59,8 +66,8 @@ http://toi.kuronekoyamato.co.jp/cgi-bin/tneko';
         $delFlg = '0';
         $datetime = date('Y-m-d H:i:s');
         $insert = "INSERT INTO dtb_mail_template(
-                            creator_id, name, file_name, subject, header, footer, del_flg, create_date, update_date)
-                    VALUES ('$creatorId', '$name', '$fileName', '$subject', '$header', '$footer', '$delFlg', '$datetime', '$datetime'
+                            template_id, creator_id, name, file_name, subject, header, footer, del_flg, create_date, update_date)
+                    VALUES ('$templateIdNumber', '$creatorId', '$name', '$fileName', '$subject', '$header', '$footer', '$delFlg', '$datetime', '$datetime'
                             );";
         $this->connection->executeUpdate($insert);
     }
