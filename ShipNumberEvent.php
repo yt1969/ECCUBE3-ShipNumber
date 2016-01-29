@@ -2,8 +2,8 @@
 /*
 * This file is part of EC-CUBE
 *
-* Copyright(c) 2000-2015 LOCKON CO.,LTD. All Rights Reserved.
-* http://www.lockon.co.jp/
+* Copyright(c) 2015 Takashi Otaki All Rights Reserved.
+* 
 *
 * For the full copyright and license information, please view the LICENSE
 * file that was distributed with this source code.
@@ -60,10 +60,13 @@ class ShipNumberEvent
                     if (isset($ShippingNumberContent)) {
                         $Shippingnumber = $ShippingNumberContent -> getShipNumber();
                         $data['header'] = str_replace("伝票番号：".$GetShipNumberFirst, "伝票番号：".$Shippingnumber, $data['header']);
-                    } else if (isset($Shippingnumber)) {
-                        $data['header'] = str_replace("伝票番号：".$Shippingnumber, "伝票番号：", $data['header']);
+                          if ($GetShipNumberFirst === "null") {
+                            $data['header'] = str_replace("伝票番号：", "伝票番号：".$Shippingnumber, $data['header']);
+                          }
+                        $GetShipNumberFirst = $Shippingnumber;
                     } else {
                         $data['header'] = str_replace("伝票番号：".$GetShipNumberFirst, "伝票番号：", $data['header']);
+                        $GetShipNumberFirst = "null";
                     }
 
                     $Order = $app['eccube.repository.order']->find($value);
@@ -277,7 +280,7 @@ class ShipNumberEvent
               $first = array("<head>", "</body>");
               $last = array("<html lang=\"ja\"><head>", "</body></html>");
               $html = str_replace($first, $last, $html);
-            
+
               $response->setContent($html);
               $event->setResponse($response);
           }
