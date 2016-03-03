@@ -183,7 +183,7 @@ class ShipNumberEvent
           $html = $response->getContent();
           $crawler = new Crawler($html);
 
-          $twig = $app->renderView('ShipNumberCsv/Resource/template/Admin/shipping_mail_all_list.twig');
+          $twig = $app->renderView('ShipNumber/Resource/template/Admin/shipping_mail_all_list.twig');
 
           $oldElement = $crawler
           ->filter('.dropdown-menu > li')
